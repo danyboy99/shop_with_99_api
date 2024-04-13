@@ -135,7 +135,13 @@ const verifyPayment = async (req, res) => {
     const verifytransaction = await flw.Transaction.verify({
       id: req.body.transaction_id,
     });
-    return res.json({
+    if (verifytransaction.status == "success") {
+      const userOrder = await Order.findOne({ paymentId: transaction_id });
+
+      userOrder.paymentConfirmed = true;
+      userOrder.save();
+    }
+    res.json({
       status: verifytransaction.status,
       msg: verifytransaction.message,
       flutterWaveRes: verifytransaction,
