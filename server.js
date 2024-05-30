@@ -4,15 +4,16 @@ const productRoutes = require("./route/product.js");
 const userRoutes = require("./route/user.js");
 const adminRoutes = require("./route/admin.js");
 const cartRoutes = require("./route/cart.js");
-const { DB_url } = require("./config/keys.js");
 const bodyParser = require("body-parser");
 const passport = require("passport");
 const passportConfig = require("./passport.js");
-const formidableMiddleware = require("express-formidable");
 const cors = require("cors");
 const checkOutRoutes = require("./route/checkout.js");
+const dotenv = require("dotenv");
 const app = express();
 //connect to mongoDB with mongoose
+dotenv.config();
+let DB_url = process.env.DB_url;
 mongoose
   .connect(DB_url)
   .then(() => {
@@ -43,6 +44,7 @@ passportConfig(passport);
 
 //index route
 // get route for displaying product
+
 app.get("/", (req, res) => {
   res.json("product app is running");
 });

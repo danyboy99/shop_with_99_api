@@ -5,7 +5,6 @@ const localStrategy = require("passport-local").Strategy;
 const User = require("./model/user.js");
 const Admin = require("./model/admin.js");
 const { jwt_secret } = require("./config/keys.js");
-
 //jsonwebtoken strategy
 
 const passportConfig = (passport) => {

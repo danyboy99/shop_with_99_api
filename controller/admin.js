@@ -1,6 +1,7 @@
 const Admin = require("../model/admin.js");
 const jwt = require("jsonwebtoken");
-const { jwt_secret } = require("../config/keys.js");
+// const { jwt_secret } = require("../config/keys.js");
+const jwt_secret = process.env.jwt_secret;
 
 const signToken = (user) => {
   return jwt.sign(
