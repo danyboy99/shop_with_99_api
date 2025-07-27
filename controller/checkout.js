@@ -36,7 +36,7 @@ const initiatePayment = async (req, res) => {
         msg: "cart not found!!",
       });
     }
-    console.log(name);
+
     const amount = userCart.totalPrice;
     const payload = {
       card_number: card_number,

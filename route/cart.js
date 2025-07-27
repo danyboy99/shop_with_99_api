@@ -13,25 +13,25 @@ router.get(
   passport.authenticate("userSign", { session: false }),
   cartController.seeds
 );
-
+// get user's cart
 router.get(
   "/shoppingcart/",
   passport.authenticate("userSign", { session: false }),
   cartController.shoppingCart
 );
-
+// add product to cart
 router.post(
   "/addToCart/:productId",
   passport.authenticate("userSign", { session: false }),
   cartController.addToShoppingCart
 );
-
+// reduce product quantity by one
 router.post(
   "/reduceByOneFromCart/:productId",
   passport.authenticate("userSign", { session: false }),
   cartController.reduceByOneFromCart
 );
-
+// remove product from cart
 router.post(
   "/removeProductFromCart/:productId",
   passport.authenticate("userSign", { session: false }),

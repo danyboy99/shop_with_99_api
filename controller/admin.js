@@ -2,7 +2,7 @@ const Admin = require("../model/admin.js");
 const jwt = require("jsonwebtoken");
 // const { jwt_secret } = require("../config/keys.js");
 const jwt_secret = process.env.jwt_secret;
-
+// Helper function to generate JWT token for admin authentication
 const signToken = (user) => {
   return jwt.sign(
     {
@@ -14,11 +14,11 @@ const signToken = (user) => {
     jwt_secret
   );
 };
-
+// Test route for admin endpoints
 const indexRoute = (req, res) => {
   res.json("admin index route");
 };
-
+// Register a new admin
 const createAdmin = async (req, res) => {
   try {
     const { fullname, email, password } = req.body;
@@ -39,7 +39,7 @@ const createAdmin = async (req, res) => {
     res.json({ error: err.message });
   }
 };
-
+// Login admin (called after passport authentication)
 const loginAdmin = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -61,7 +61,7 @@ const loginAdmin = async (req, res) => {
     res.json({ error: err.message });
   }
 };
-
+// Get admin profile information
 const adminProfile = (req, res) => {
   try {
     return res.json({

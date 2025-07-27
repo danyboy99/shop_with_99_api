@@ -1,26 +1,33 @@
+// Import required modules and models
 const Product = require("../model/product.js");
 const validateProductInput = require("../validation/product.js");
 const { cloudinary } = require("../config/keys.js");
 
+// Test route for product endpoints
 const indexRoute = (req, res) => {
   res.json("product route");
 };
 
+// Create a new product with image upload
 const createProduct = async (req, res) => {
   try {
+    // Validate input data
     const { error, isValid } = validateProductInput(req.body);
-    // check validation
     if (!isValid) {
       if (!req.file) {
         error.image = "product image is required";
       }
       return res.status(400).json(error);
     }
+
+    // Upload image to Cloudinary
     let imageUrl = "";
     await cloudinary.uploader.upload(req.file.path).then((data) => {
       console.log("cloudinary upload resp:", data);
       imageUrl = data.url;
     });
+
+    // Create product with uploaded image URL
     const { name, category, price, about } = req.body;
     Product.create({
       name,
@@ -40,11 +47,13 @@ const createProduct = async (req, res) => {
   }
 };
 
+// Update an existing product
 const updateProduct = (req, res) => {
   try {
     const id = req.params.id;
     const { name, category, price, about } = req.body;
 
+    // Find product by ID and update with new data
     Product.findByIdAndUpdate(
       id,
       {
@@ -53,7 +62,7 @@ const updateProduct = (req, res) => {
         price,
         about,
       },
-      { new: true }
+      { new: true } // Return updated document
     ).then((data) => {
       res.json({
         status: "success",
@@ -66,10 +75,12 @@ const updateProduct = (req, res) => {
   }
 };
 
+// Delete a product
 const deleteProduct = (req, res) => {
   try {
     const id = req.params.id;
 
+    // Find product by ID and delete
     Product.findByIdAndDelete(id).then((data) => {
       res.json({
         status: "success",
@@ -81,6 +92,8 @@ const deleteProduct = (req, res) => {
     res.json({ error: err.message });
   }
 };
+
+// Export all controller functions
 module.exports = {
   indexRoute,
   createProduct,

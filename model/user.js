@@ -1,8 +1,10 @@
+// Import required packages
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 
 const { Schema } = mongoose;
 
+// Define user schema with required fields
 const userSchema = new Schema(
   {
     fullname: {
@@ -26,15 +28,14 @@ const userSchema = new Schema(
     },
   },
   {
-    timestamps: true,
+    timestamps: true, // Automatically add createdAt and updatedAt fields
   }
 );
 
+// Hash password before saving to database
 userSchema.pre("save", async function (next) {
   try {
-    // if (this.method !== "local") {
-    //   next();
-    // }
+    // Generate salt and hash the password
     const salt = await bcrypt.genSalt(10);
     const hashPassword = await bcrypt.hash(this.password, salt);
     this.password = hashPassword;
@@ -44,6 +45,7 @@ userSchema.pre("save", async function (next) {
   }
 });
 
+// Method to validate password during login
 userSchema.method("isPasswordValid", async function (Password) {
   try {
     return await bcrypt.compare(Password, this.password);
@@ -52,6 +54,7 @@ userSchema.method("isPasswordValid", async function (Password) {
   }
 });
 
+// Create and export user model
 const user = mongoose.model("user", userSchema);
 
 module.exports = user;

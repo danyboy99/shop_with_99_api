@@ -1,56 +1,46 @@
+// Import required models
 const Cart = require("../model/cart.js");
 const product = require("../model/product.js");
 const Product = require("../model/product.js");
 
+// Test/seed function for cart operations
 const seeds = async (req, res) => {
   try {
     const item = req.params.productId;
 
+    // Create a test cart with placed order status
     await Cart.create({
       user: req.user,
       placedOrderStatus: true,
     }).then((data) => {
       res.json(data);
     });
-    // const sample = {
-    //   sum: {
-    //     items: {
-    //       id: "65af53c33d8c0f395131d097",
-    //       imagePath:
-    //         "https://en.wikipedia.org/wiki/Baldur%27s_Gate_3#/media/File:Baldur's_Gate_3_cover_art.jpg",
-    //       title: "baldur's game 3",
-    //       discription: "action game!!",
-    //       price: 30,
-    //       __v: 0,
-    //     },
-    //   },
-    // };
-
-    // const result = sample["show"];
-
-    // if (result) {
-    //   res.json("found");
-    // } else {
-    //   res.json("not found!!");
-    // }
   } catch (err) {
     console.log("err", err.message);
     res.json({ error: err.message });
   }
 };
 
+// Add a product to user's shopping cart
 const addToShoppingCart = async (req, res) => {
   try {
     const productId = req.params.productId;
+
+    // Find the product to add to cart
     const productCollection = await Product.findOne({ _id: productId });
     if (!productCollection) {
       return res.json({ error: "sorry no product with this id was found." });
     }
+
     const user = req.user._id;
+
+    // Find user's active cart (not yet placed as order)
     const userCart = await Cart.findOne({
       user: user,
       placedOrderStatus: false,
     });
+
+    // If no cart exists, create a new one
     if (!userCart) {
       const newCart = await Cart.create({
         user: user,
@@ -67,6 +57,8 @@ const addToShoppingCart = async (req, res) => {
 
       return res.json(newCart);
     }
+
+    // Check if product already exists in cart
     let foundProduct = "";
     userCart.items.map((item) => {
       if (item.product._id.toString() == productId) {
@@ -77,6 +69,7 @@ const addToShoppingCart = async (req, res) => {
       return;
     });
 
+    // If product exists in cart, update quantity and price
     if (foundProduct !== "") {
       userCart.items.map((item) => {
         if (item.product._id.toString() == foundProduct) {
@@ -92,6 +85,7 @@ const addToShoppingCart = async (req, res) => {
         return res.json(data);
       });
     } else {
+      // If product doesn't exist in cart, add as new item
       const newProduct = {
         product: productCollection,
         price: productCollection.price,
@@ -111,14 +105,20 @@ const addToShoppingCart = async (req, res) => {
     res.json({ error: err.message });
   }
 };
+// Reduce quantity of a product in cart by one
 const reduceByOneFromCart = async (req, res) => {
   try {
     const productId = req.params.productId;
+
+    // Find the product to reduce from cart
     const productCollection = await Product.findOne({ _id: productId });
     if (!productCollection) {
       return res.json({ error: "sorry no product with this id was found." });
     }
+
     const user = req.user._id;
+
+    // Find user's active cart
     const userCart = await Cart.findOne({
       user: user,
       placedOrderStatus: false,
@@ -131,19 +131,22 @@ const reduceByOneFromCart = async (req, res) => {
       });
     }
 
+    // Check if product exists in cart
     let foundProduct = "";
-
     userCart.items.map((item) => {
       if (item.product._id.toString() === productId) {
         foundProduct = item.product._id.toString();
       }
     });
+
     if (foundProduct !== "") {
+      // Reduce quantity and price, remove if quantity becomes 0
       userCart.items.map((item) => {
         if (item.product._id.toString() == foundProduct) {
           item.price -= productCollection.price;
           item.quantity--;
 
+          // Remove item if quantity is 0 or less
           if (item.quantity <= 0) {
             const index = userCart.items.findIndex(
               (item) => item.product._id.toString() === foundProduct
@@ -153,6 +156,8 @@ const reduceByOneFromCart = async (req, res) => {
         }
         return;
       });
+
+      // Update cart totals
       userCart.totalPrice -= productCollection.price;
       userCart.totalQty--;
       console.log(`updated userCart : ${userCart}`);
@@ -171,14 +176,20 @@ const reduceByOneFromCart = async (req, res) => {
   }
 };
 
+// Remove a product completely from cart
 const removeProductFromCart = async (req, res) => {
   try {
     const productId = req.params.productId;
+
+    // Find the product to remove from cart
     const productCollection = await Product.findOne({ _id: productId });
     if (!productCollection) {
       return res.json({ error: "sorry no product with this id was found." });
     }
+
     const user = req.user._id;
+
+    // Find user's active cart
     const userCart = await Cart.findOne({
       user: user,
       placedOrderStatus: false,
@@ -191,6 +202,7 @@ const removeProductFromCart = async (req, res) => {
       });
     }
 
+    // Find product in cart and get its total price and quantity
     let foundProduct = "";
     let productTotalPrice = 0;
     let productTotalQty = 0;
@@ -202,11 +214,15 @@ const removeProductFromCart = async (req, res) => {
       }
       return;
     });
+
     if (foundProduct !== "") {
+      // Remove product from cart completely
       const index = userCart.items.findIndex(
         (item) => item.product._id.toString() === foundProduct
       );
       userCart.items.splice(index, 1);
+
+      // Update cart totals
       userCart.totalQty -= productTotalQty;
       userCart.totalPrice -= productTotalPrice;
       userCart.save().then((data) => {
@@ -224,9 +240,11 @@ const removeProductFromCart = async (req, res) => {
   }
 };
 
+// Get user's current shopping cart
 const shoppingCart = async (req, res) => {
   const user = req.user;
 
+  // Find user's active cart
   const userCart = await Cart.findOne({
     user: user._id,
     placedOrderStatus: false,
@@ -246,6 +264,7 @@ const shoppingCart = async (req, res) => {
   }
 };
 
+// Export all controller functions
 module.exports = {
   seeds,
   addToShoppingCart,

@@ -1,8 +1,10 @@
+// Import required packages
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 
 const { Schema } = mongoose;
 
+// Define admin schema for administrative users
 const adminSchema = new Schema(
   {
     fullname: {
@@ -19,15 +21,14 @@ const adminSchema = new Schema(
     },
   },
   {
-    timestamps: true,
+    timestamps: true, // Automatically add createdAt and updatedAt fields
   }
 );
 
+// Hash password before saving to database
 adminSchema.pre("save", async function (next) {
   try {
-    // if (this.method !== "local") {
-    //   next();
-    // }
+    // Generate salt and hash the password
     const salt = await bcrypt.genSalt(10);
     const hashPassword = await bcrypt.hash(this.password, salt);
     this.password = hashPassword;
@@ -37,6 +38,7 @@ adminSchema.pre("save", async function (next) {
   }
 });
 
+// Method to validate password during login
 adminSchema.method("isPasswordValid", async function (Password) {
   try {
     return await bcrypt.compare(Password, this.password);
@@ -45,6 +47,7 @@ adminSchema.method("isPasswordValid", async function (Password) {
   }
 });
 
+// Create and export admin model
 const admin = mongoose.model("admin", adminSchema);
 
 module.exports = admin;

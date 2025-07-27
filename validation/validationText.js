@@ -1,6 +1,6 @@
 const validateLoginInput = require("./login.js");
 const validateRegisterInput = require("./adminRegister.js");
-
+// validate login input
 const validationLoginText = (req, res, next) => {
   const { error, isValid } = validateLoginInput(req.body);
   // check validation
@@ -10,7 +10,7 @@ const validationLoginText = (req, res, next) => {
     next();
   }
 };
-
+// validate register input
 const validationRegisterText = (req, res, next) => {
   const { error, isValid } = validateRegisterInput(req.body);
   // check validation

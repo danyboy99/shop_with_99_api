@@ -1,3 +1,4 @@
+// Import required packages and modules
 const express = require("express");
 const mongoose = require("mongoose");
 const productRoutes = require("./route/product.js");
@@ -10,9 +11,14 @@ const passportConfig = require("./passport.js");
 const cors = require("cors");
 const checkOutRoutes = require("./route/checkout.js");
 const dotenv = require("dotenv");
+
+// Initialize Express app
 const app = express();
-//connect to mongoDB with mongoose
+
+// Load environment variables
 dotenv.config();
+
+// Connect to MongoDB database
 let DB_url = process.env.DB_url;
 mongoose
   .connect(DB_url)
@@ -22,51 +28,35 @@ mongoose
   .catch((err) => {
     console.log("error:", err.message);
   });
-// set middleware
-// set cors
+
+// Configure middleware
+// Enable CORS for cross-origin requests
 app.use(cors());
 
-// parse application/x-www-form-urlencoded
+// Parse URL-encoded data from forms
 app.use(bodyParser.urlencoded({ extended: false }));
 
-// parse application/json
+// Parse JSON data from requests
 app.use(bodyParser.json());
 
+// Initialize Passport for authentication
 app.use(passport.initialize());
-
 passportConfig(passport);
-// app.use(
-//   formidableMiddleware({
-//     encoding: "utf-8",
-//     multiples: true, // req.files to be arrays of files
-//   })
-// );
 
-//index route
-// get route for displaying product
-
+// Root route - API health check
 app.get("/", (req, res) => {
   res.json("product app is running");
 });
-// product route
-app.use("/product", productRoutes);
 
-//user route
-app.use("/user", userRoutes);
+// Configure API routes
+app.use("/product", productRoutes); // Product management routes
+app.use("/user", userRoutes); // User authentication and profile routes
+app.use("/admin", adminRoutes); // Admin authentication and management routes
+app.use("/cart", cartRoutes); // Shopping cart routes
+app.use("/checkout", checkOutRoutes); // Payment and checkout routes
 
-//admin route
-app.use("/admin", adminRoutes);
-
-// cart route
-app.use("/cart", cartRoutes);
-
-//checkout route
-app.use("/checkout", checkOutRoutes);
-
-//setup port and listen
-
+// Start server
 const port = process.env.PORT || 8000;
-
 app.listen(port, () => {
   console.log(`app is running on port ${port}`);
 });
